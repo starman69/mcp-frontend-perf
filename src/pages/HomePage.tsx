@@ -9,7 +9,7 @@ export default function HomePage() {
           Frontend Performance Anti-Patterns
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-400 max-w-4xl mx-auto max-md:text-base">
-          {examples.length} interactive demos to learn frontend performance anti-patterns.
+          Interactive demos to learn frontend performance anti-patterns.
           Explore manually with DevTools or integrate with AI Coding Agents like Claude Code
           to automate detection, review, and fixes.
         </p>
