@@ -23,6 +23,9 @@ export default function BadRenderBlocking() {
       let totalTime = 0;
 
       // Simulate each blocking script sequentially
+      // Using a variable outside the loop to prevent JIT optimization
+      let preventOptimization = 0;
+
       newScripts.forEach((script, index) => {
         const scriptStart = performance.now();
 
@@ -32,11 +35,16 @@ export default function BadRenderBlocking() {
         for (let i = 0; i < iterations; i++) {
           sum += Math.sqrt(i);
         }
+        // Prevent dead code elimination by using the result
+        preventOptimization += sum;
 
         const scriptTime = Math.round(performance.now() - scriptStart);
         newScripts[index] = { ...script, time: scriptTime, loaded: true };
         totalTime += scriptTime;
       });
+
+      // Ensure the value is "used" to prevent optimization
+      if (preventOptimization < 0) console.log(preventOptimization);
 
       const endTime = performance.now();
       setBlockingTime(Math.round(endTime - startTime));

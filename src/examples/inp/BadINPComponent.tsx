@@ -14,6 +14,8 @@ export default function BadINPComponent() {
     for (let i = 0; i < 10_000_000; i++) {
       sum += Math.random();
     }
+    // Prevent dead code elimination
+    if (sum < 0) console.log(sum);
     setClickCount((c) => c + 1);
   };
 
@@ -26,6 +28,8 @@ export default function BadINPComponent() {
     for (let i = 0; i < 5_000_000; i++) {
       dummy += Math.sin(i);
     }
+    // Prevent dead code elimination
+    if (dummy < -Infinity) console.log(dummy);
 
     setFilterText(value);
   };
