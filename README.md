@@ -2,7 +2,7 @@
 
 A frontend performance anti-patterns demo showcasing AI-powered root cause analysis using Claude Code with MCP (Model Context Protocol) servers for browser automation.
 
-## What This Is
+## Overview
 
 This project demonstrates how AI can automatically detect, analyze, and diagnose web performance issues by connecting directly to browser DevTools. It includes intentionally "bad" performance demos that trigger real Core Web Vitals warnings.
 
@@ -13,10 +13,25 @@ This project demonstrates how AI can automatically detect, analyze, and diagnose
 - Real DevTools metrics, not simulations
 - Copy-paste prompts for Claude Code on every demo
 
-**Quick Start:**
-1. Press `F12` to open DevTools Performance panel
-2. Navigate to any demo and trigger the anti-pattern
-3. Or use Claude Code with the suggested prompt to automate the analysis
+## Two Ways to Use This
+
+### Option 1: Interactive Exploration (No Setup)
+
+Visit the live demo: **https://starman69.github.io/mcp-frontend-perf/**
+
+- Browse any demo and trigger anti-patterns manually
+- Open DevTools (`F12`) to see performance issues
+- Great for learning without any installation
+
+### Option 2: Run Locally with AI Agent (Recommended)
+
+Clone and run locally to enable Claude Code integration:
+
+- AI can read and analyze the source code directly
+- Full MCP browser automation support
+- Get detailed root cause analysis with file/line references
+
+See [Setup](#setup) below for local installation.
 
 ## MCP Browser Architecture
 
@@ -52,24 +67,43 @@ We use **Chrome Canary** as the target browser because:
 
 ## Setup
 
-### 1. Install Chrome Canary
+### Prerequisites
 
-Download from: https://www.google.com/chrome/canary/
+- **Node.js 18+** (recommended: Node 20 LTS) - [Download](https://nodejs.org/)
+- **Chrome Canary** - [Download](https://www.google.com/chrome/canary/)
 
-### 2. Launch Chrome Canary with Remote Debugging
+### 1. Clone and Install
+
+```bash
+git clone https://github.com/starman69/mcp-frontend-perf.git
+cd mcp-frontend-perf
+npm install
+```
+
+### 2. Start the Demo App
+
+```bash
+npm run dev
+```
+
+The app runs at `http://localhost:5173` (Vite will use the next available port if busy).
+
+### 3. Launch Chrome Canary with Remote Debugging
+
+Open a new terminal and run:
 
 ```bash
 # macOS
 /Applications/Google\ Chrome\ Canary.app/Contents/MacOS/Google\ Chrome\ Canary --remote-debugging-port=9222
 
-# Windows
+# Windows (replace <USER> with your username)
 "C:\Users\<USER>\AppData\Local\Google\Chrome SxS\Application\chrome.exe" --remote-debugging-port=9222
 
 # Linux
 google-chrome-canary --remote-debugging-port=9222
 ```
 
-### 3. Configure MCP Servers
+### 4. Configure MCP Servers for Claude Code
 
 Add to your Claude Code MCP settings (`~/.claude.json` or project `.mcp.json`):
 
@@ -92,14 +126,17 @@ Add to your Claude Code MCP settings (`~/.claude.json` or project `.mcp.json`):
 }
 ```
 
-### 4. Install and Run the Demo App
+### 5. Run Claude Code
 
 ```bash
-npm install
-npm run dev
+cd mcp-frontend-perf
+claude
 ```
 
-The app runs at `http://localhost:5173` (or next available port).
+Now you can ask Claude to analyze any demo. Example:
+```
+Navigate to localhost:5173/#/layout-thrashing and analyze what's causing forced reflows
+```
 
 ## Performance Anti-Patterns Included
 
@@ -139,7 +176,7 @@ Each demo includes:
 ### Example: Analyzing Layout Thrashing
 
 ```
-You: "Navigate to localhost:5173/layout-thrashing, record a performance
+You: "Navigate to localhost:5173/#/layout-thrashing, record a performance
       trace while scrolling, and tell me what's causing the forced reflows"
 ```
 
@@ -219,20 +256,23 @@ Claude will:
 ## Example Session
 
 ```bash
-# Terminal 1: Start Chrome Canary with remote debugging
-google-chrome-canary --remote-debugging-port=9222
-
-# Terminal 2: Start the demo app
+# Terminal 1: Start the demo app
 cd mcp-frontend-perf
 npm run dev
 
-# Terminal 3: Start Claude Code
+# Terminal 2: Start Chrome Canary with remote debugging
+google-chrome-canary --remote-debugging-port=9222
+
+# Terminal 3: Start Claude Code (from the project directory)
+cd mcp-frontend-perf
 claude
 
 # In Claude Code, ask:
-> "Using chrome devtools, navigate to localhost:5173/cls,
-   trigger the layout shifts, and analyze the CLS score"
+> "Navigate to localhost:5173/#/cls, trigger the layout shifts,
+   and analyze the CLS score"
 ```
+
+> **Note:** This app uses HashRouter for GitHub Pages compatibility. All routes include `/#/` (e.g., `localhost:5173/#/lcp`).
 
 ## Sample Analysis Output
 
