@@ -33,7 +33,7 @@ export default function HomePage() {
           <div className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
             <p>Explore each demo manually to understand performance issues:</p>
             <ul className="list-disc list-inside space-y-1">
-              <li>Open DevTools with <kbd className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs font-mono">F12</kbd></li>
+              <li>Use Chrome, Open DevTools with <kbd className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs font-mono">F12</kbd></li>
               <li>Trigger the anti-pattern and observe the impact</li>
               <li>Review the source code to understand the root cause</li>
             </ul>
