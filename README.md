@@ -35,26 +35,51 @@ See [Setup](#setup) below for local installation.
 
 ## MCP Browser Architecture
 
-```
-┌─────────────────┐     ┌──────────────────────┐     ┌─────────────────┐
-│   Claude Code   │────▶│   MCP Servers        │────▶│  Chrome Canary  │
-│   (AI Agent)    │     │                      │     │  (CDP Target)   │
-└─────────────────┘     │  ┌────────────────┐  │     └─────────────────┘
-                        │  │ Playwright MCP │  │              │
-                        │  └────────────────┘  │              │
-                        │  ┌────────────────┐  │     Chrome DevTools
-                        │  │ Chrome DevTools│  │       Protocol
-                        │  │     MCP        │  │        (CDP)
-                        │  └────────────────┘  │
-                        └──────────────────────┘
+```mermaid
+flowchart LR
+    subgraph agent["🤖 Coding Agent"]
+        A["Claude Code<br/>Copilot<br/>Cursor<br/>etc."]
+    end
+
+    subgraph mcp["🔌 MCP Servers"]
+        direction TB
+        P["<b>Playwright MCP</b><br/>Navigation • Clicks<br/>Typing • Screenshots"]
+        D["<b>Chrome DevTools MCP</b><br/>Performance Traces<br/>Network • Console"]
+    end
+
+    subgraph browser["🌐 Chrome Canary"]
+        B["Browser Instance<br/><i>--remote-debugging-port=9222</i>"]
+        APP["Demo App<br/>localhost:5173"]
+    end
+
+    A -->|stdio| P
+    A -->|stdio| D
+    P -->|CDP| B
+    D -->|CDP| B
+    B --> APP
+
+    style agent fill:#e0f2fe,stroke:#0ea5e9,stroke-width:2px,color:#0c4a6e
+    style mcp fill:#fef9c3,stroke:#eab308,stroke-width:2px,color:#713f12
+    style browser fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#14532d
+
+    style A fill:#f1f5f9,stroke:#94a3b8,stroke-width:1px,color:#334155
+    style P fill:#fefce8,stroke:#a3a3a3,stroke-width:1px,color:#1f2937
+    style D fill:#fefce8,stroke:#a3a3a3,stroke-width:1px,color:#1f2937
+    style B fill:#f0fdf4,stroke:#94a3b8,stroke-width:1px,color:#1f2937
+    style APP fill:#ffffff,stroke:#94a3b8,stroke-width:1px,color:#1f2937
 ```
 
-Both MCP servers use **Chrome DevTools Protocol (CDP)** to communicate with the browser, enabling:
-- Performance trace recording and analysis
-- DOM inspection and interaction
-- Network request monitoring
-- Console message capture
-- Screenshot and snapshot capture
+**How it works:**
+| Layer | Protocol | Purpose |
+|-------|----------|---------|
+| Agent ↔ MCP | stdio | JSON-RPC tool calls |
+| MCP ↔ Browser | CDP | Chrome DevTools Protocol commands |
+
+Both MCP servers connect to the same Chrome instance, enabling:
+- **Performance traces** - Record and analyze Core Web Vitals
+- **DOM interaction** - Click, type, scroll, screenshot
+- **Network monitoring** - Request waterfall, timing, headers
+- **Console capture** - Errors, warnings, React messages
 
 ## Why Chrome Canary?
 
@@ -103,9 +128,9 @@ Open a new terminal and run:
 google-chrome-canary --remote-debugging-port=9222
 ```
 
-### 4. Configure MCP Servers for Claude Code
+### 4. Configure MCP Servers
 
-Add to your Claude Code MCP settings (`~/.claude.json` or project `.mcp.json`):
+Create a `.mcp.json` file in the project root (recommended for project-specific config):
 
 ```json
 {
@@ -126,6 +151,8 @@ Add to your Claude Code MCP settings (`~/.claude.json` or project `.mcp.json`):
 }
 ```
 
+Alternatively, add to your global `~/.claude.json` if you want these MCP servers available across all projects.
+
 ### 5. Run Claude Code
 
 ```bash
@@ -133,9 +160,15 @@ cd mcp-frontend-perf
 claude
 ```
 
-Now you can ask Claude to analyze any demo. Example:
+At startup, Claude Code automatically reads `CLAUDE.md` which contains:
+- Demo route mappings (so you can say "go to the CLS demo" without URLs)
+- MCP tool selection guidance (which tool to use for each task type)
+- Common analysis patterns for each performance issue type
+- Source code locations for root cause reporting
+
+Now you can ask Claude to analyze any demo by name:
 ```
-Navigate to localhost:5173/#/layout-thrashing and analyze what's causing forced reflows
+Go to the layout thrashing demo and analyze what's causing forced reflows
 ```
 
 ## Performance Anti-Patterns Included
@@ -144,7 +177,7 @@ Each demo includes:
 - **Problem** - What causes the issue
 - **DevTools Detection** - How to find it manually
 - **MCP Automation** - Playwright for interaction, Chrome DevTools for metrics
-- **Claude Code Prompt** - Copy-paste prompt for AI analysis
+- **Coding Agent Prompt** - Copy-paste prompt for AI analysis
 
 | Demo | Core Web Vital | What It Demonstrates |
 |------|---------------|---------------------|
@@ -176,12 +209,12 @@ Each demo includes:
 ### Example: Analyzing Layout Thrashing
 
 ```
-You: "Navigate to localhost:5173/#/layout-thrashing, record a performance
-      trace while scrolling, and tell me what's causing the forced reflows"
+You: "Go to the layout thrashing demo, record a performance trace while
+      scrolling, and tell me what's causing the forced reflows"
 ```
 
-Claude will:
-1. Navigate to the page using MCP
+The AI will:
+1. Navigate to the page (using route from CLAUDE.md)
 2. Start a performance trace
 3. Trigger scrolling via browser automation
 4. Stop the trace and analyze insights
@@ -194,7 +227,7 @@ You: "Load the LCP demo with a performance trace and break down
       what's contributing to the slow LCP time"
 ```
 
-Claude will:
+The AI will:
 1. Start trace with page reload
 2. Wait for LCP element to load
 3. Analyze LCP breakdown (TTFB, load delay, render delay)
@@ -207,7 +240,7 @@ You: "Go to the CLS demo, trigger the layout shifts, and tell me
       what's causing the bad CLS score"
 ```
 
-Claude will:
+The AI will:
 1. Navigate and take initial snapshot
 2. Start performance trace
 3. Click the trigger button
@@ -268,15 +301,14 @@ cd mcp-frontend-perf
 claude
 
 # In Claude Code, ask:
-> "Navigate to localhost:5173/#/cls, trigger the layout shifts,
-   and analyze the CLS score"
+> "Go to the CLS demo, trigger the layout shifts, and analyze the CLS score"
 ```
 
-> **Note:** This app uses HashRouter for GitHub Pages compatibility. All routes include `/#/` (e.g., `localhost:5173/#/lcp`).
+> **Note:** Claude Code reads `CLAUDE.md` at startup, which maps demo names to routes. You can reference demos by name (e.g., "CLS demo", "layout thrashing demo") without specifying URLs.
 
 ## Sample Analysis Output
 
-When Claude analyzes the Layout Thrashing demo, you get results like:
+When the AI analyzes the Layout Thrashing demo, you get results like:
 
 ```
 Performance Analysis: Layout Thrashing Demo
