@@ -44,7 +44,11 @@ export default function BadImagesComponent() {
     },
   ];
 
-  const totalSize = images.reduce((sum, img) => sum + parseFloat(img.fileSize), 0);
+  const totalSize = images.reduce((sum, img) => {
+    const value = parseFloat(img.fileSize);
+    const isKB = img.fileSize.includes('KB');
+    return sum + (isKB ? value / 1024 : value);
+  }, 0);
 
   return (
     <div className="space-y-4">
