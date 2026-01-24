@@ -2,6 +2,25 @@
 
 This is a web performance anti-patterns demo app for showcasing AI-powered root cause analysis using MCP browser automation.
 
+## Project Specification
+
+For detailed project requirements, consult **[SPEC.md](./SPEC.md)** which contains:
+
+| When to Use SPEC.md | What You'll Find |
+|---------------------|------------------|
+| Adding/modifying demos | Component contracts, required UI elements, acceptance criteria |
+| Understanding architecture | Directory structure, component hierarchy, data flow |
+| Implementing new features | Example interface, demo state patterns, color system |
+| Checking requirements | User stories, success criteria, non-functional requirements |
+| Understanding AI prompts | Prompt templates, insight mappings, MCP tool selection rules |
+
+**Key SPEC.md Sections:**
+- §3.3 Demo Component Requirements - What each `Bad*Component` MUST implement
+- §6.1 Example Interface - TypeScript interface for demo metadata
+- §7.3 Bad*Component Contract - Required exports, UI elements, and behaviors
+- §9 AI/MCP Integration - Tool selection rules, available insights, prompt templates
+- Appendix A - Detailed implementation specs for each demo type
+
 ## Development Server
 
 The app runs on Vite. Default URL: `http://localhost:5173`
@@ -190,3 +209,12 @@ Look for:
 ### Using Network Panel
 - **Sequential chunk downloads** → Suspense waterfall (nested lazy loading)
 - **Repeated API calls** → useEffect over-fetching
+
+## Modifying or Adding Demos
+
+Before creating or modifying demo components, read SPEC.md for:
+- **Required UI elements**: Trigger button, reset button, metrics display, explanation boxes
+- **Color coding**: Red=problem, Yellow=warning, Green=good, Blue=info
+- **State pattern**: `isTriggered`, `isRunning`, `metrics` shape
+- **Cleanup**: Must clean up resources on unmount
+- **Real issues only**: Must trigger actual measurable performance problems, not simulations
